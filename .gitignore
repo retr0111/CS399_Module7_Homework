@@ -1,0 +1,4 @@
+/.venv/
+model/glove_short.txt
+.DS_Store
+__pycache__/
