@@ -54,7 +54,7 @@ class Model(list):
                 self.append(Word(sa[0], [float(x) for x in sa[1:]]))
         print(f"Loaded in {process_time() - t0} secs")
 
-    def find_word(self, text: str) -> Word | None:
+    def find_word(self, text: str) -> Word:
         for w in self:
             if w.text == text:
                 return w
