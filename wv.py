@@ -4,13 +4,14 @@
     Loading even a model with just 100_000 words takes about 5 seconds.
     Author: Wolf Paulus, https://wolfpaulus.com
 """
-from typing import Self
 from math import sqrt
 from time import process_time
 from pathlib import Path
 
+
 class Word:
     """ Represents a word and its vector"""
+
     def __init__(self, text: str, vector: list[float]) -> None:
         self.text = text
         self.vector = vector
@@ -26,16 +27,16 @@ class Word:
         length = self.norm()
         self.vector = [x / length for x in self.vector]
 
-    def similarity(self, w: Self) -> float:
+    def similarity(self, w) -> float:
         return self * w
 
-    def __add__(self, w: Self) -> Self:
+    def __add__(self, w):
         return Word("", [x + y for x, y in zip(self.vector, w.vector)])
 
-    def __sub__(self, w: Self) -> Self:
+    def __sub__(self, w):
         return Word("", [x - y for x, y in zip(self.vector, w.vector)])
 
-    def __mul__(self, w: Self) -> float:
+    def __mul__(self, w) -> float:
         return sum([x * y for x, y in zip(self.vector, w.vector)])
 
 
