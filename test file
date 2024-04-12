@@ -1,7 +1,7 @@
 from wv import Model
 from scipy.stats import zscore
 
-def eliminateword_outliers(words: list, model_path: str) -> list:
+def eliminateword_outliers(model: Model, words: list) -> list:
     """
     words: list of str words
     model_path: path to the word vector model file
@@ -9,22 +9,21 @@ def eliminateword_outliers(words: list, model_path: str) -> list:
     :returns: list of str words without outliers
     """
     # Initialize the model
-    model = Model
     
-    word_models = []  # Stores the model vectors of the words in the input list
+    
+    
+    
+    word_models = [model.find_word(x) for x in words]  # Stores the model vectors of the words in the input list
 
-    for str_word in words:
+    for str_word in word_models:
         # fetch vector form of word from model
-        word_vec = model[str_word]
 
         # End program if a vector representation of a word could not be found in the model.
-        if word_vec is None:
+        if str_word in word_models is None:
             print(f'Vector representation could not be found in model for word: {str_word}')
             return None
-
-        # Normalize and append word vector
-        #word_vec.normalize()    
-        word_models.append(word_vec)
+        str_word.normalize()
+    
 
     # get similarity to all other words from their models
     similarity_values = []
@@ -39,5 +38,5 @@ def eliminateword_outliers(words: list, model_path: str) -> list:
     return [words[x] for x in range(len(words)) if sim_zscores[x] <= 1]
 
 # Example usage
-result = eliminateword_outliers(["dog", "cat", "turtle", "blueberry"], str("model/glove_short.txt"))
+result = eliminateword_outliers("model/glove_short.txt", ["dog", "cat", "turtle", "blueberry"])
 print(result)
