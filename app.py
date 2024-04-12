@@ -1,57 +1,39 @@
-"""
-    Streamlit app for the project
-"""
-from pathlib import Path
-import requests
-import streamlit as st
+import numpy as np
+from scipy.stats import zscore
+from pathlib import Path  # Import Path module
 from wv import Model
 
 
-def download_from_one_drive(url: str, target: Path) -> None:
-    """ Download a file from the internet """
-    if "?" in url:
-        url = url[:url.index("?")]
-    url += "?download=1"
+def process_input(input_text):
+    model = Model(("model/glove_short.txt"))
+    input_list = [word.strip() for word in input_text.split(",")]
+    if len(input_list) > 1:
+        word_vectors = [model.find_word(word).vector for word in input_list if model.find_word(word)]
+        if len(word_vectors) > 1:
+            z_scores = zscore(np.array(word_vectors))
+            threshold = 0.7
+            filtered_words = []
+            filtered_out_words = []
+            prev_word = model.find_word(input_list[0])
+            for word, z_score in zip(input_list[1:], z_scores[1:]):
+                current_word = model.find_word(word)
+                if prev_word and current_word and prev_word.similarity(current_word) >= threshold:
+                    filtered_words.append(word)
+                else:
+                    filtered_out_words.append(word)
+                prev_word = current_word
+            return filtered_words, filtered_out_words
+    return [], []
 
-    with requests.get(url, stream=True) as response:
-        response.raise_for_status()
-        with target.open('wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                # If you have chunk encoded response uncomment if
-                # and set chunk_size parameter to None.
-                # if chunk:
-                f.write(chunk)
+# This part remains expansive for Streamlit
+import streamlit as st
+
+user_input_text = st.text_input("Insert a list with commas")
+if user_input_text:
+    filtered_words, filtered_out_words = process_input(user_input_text)
+    st.write("Filtered words:", filtered_words)
+    st.write("Filtered out words:", filtered_out_words)
+else:
+    st.write("No input provided")
 
 
-@st.cache_resource
-def load_model(name: str) -> Model:
-    """ Load a model from the cloud if not already loaded """
-    try:
-        save_dest = Path('model')
-        save_dest.mkdir(exist_ok=True)
-
-        f_checkpoint = save_dest.joinpath(name)
-        if not f_checkpoint.exists():
-            with st.spinner("Downloading model... please wait"):
-                download_from_one_drive(cloud_model_location, f_checkpoint)
-        return Model(f_checkpoint)
-    except OSError as e:
-        st.error(f"Error: {e.strerror}")
-
-
-cloud_model_location = "https://myerauedu-my.sharepoint.com/:t:/g/personal/paulusw_erau_edu/ET7q4WvkFEJNtziyn8-cPCgBta1PlXLolFr-BrDqcY9Nsg"
-
-st.title('Simple Word Relationship App')
-st.write('a to b is like c to ?')
-model = load_model("glove_short.txt")
-st.toast("Model loaded successfully")
-
-king = model.find_word("king")
-man = model.find_word("man")
-woman = model.find_word("woman")
-q = king - man + woman
-q.normalize()
-x = model.find_similar_words(q, 10)
-st.text(x)
-st.divider()
-st.text(f"'king' to 'man' is like '{x[0].text}' to 'woman'")

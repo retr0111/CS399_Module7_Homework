@@ -1,0 +1,36 @@
+def eliminateword_outliers(words: list, model: Model) -> list:
+    """
+    str_list: list of str words
+    model: word vector model
+
+    :returns: list of str words without outliers
+    """
+
+    word_models = []        # Stores the model vectors of the words in input list
+    for str_word in words:
+
+        # fetch vector form of word from model
+        word_vec = model[???] """ fill this in """
+
+        # End program if a vector representation of a word could not be found in the model.
+        if word_vec is None:
+            print(f'Vector representation could not be found in model for word: {str_word}')
+            return None
+
+        # Normalize and append word vector
+        word_vec.n_r_a_i_e()    """Modify this function name"""
+        word_models.append(???) """ fill this in """
+
+    # get similarity to all other words from their models
+    similarity_values = []
+    for word in word_models:
+        sim = sum([word."""certain word class method here"""(w) for w in word_models]) - __ """something related to the word its self"""
+        similarity_values.append(sim)
+
+    # Calcluate Z scores to determine true similarity
+    sim_zscores = zscore(similarity_values) """ I dont remember what this does """
+
+    return [words[x] for x in range(len(words)) if """important part here"""""] 
+    """ The important part regards comparing the zscore to a theshold value which will determine if it is similar or
+    not depending on if it is above or below that threshold. 
+    Hint: abs(some weird score thing) <= (some value related to normalization)"""ZTT
